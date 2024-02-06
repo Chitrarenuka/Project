@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        #id1 {
+            border: solid 1px;
+            border-radius: 10px;
+            margin-right: 700px;
+        }
+        
+        .saved-entry {
+            border: solid 1px;
+            margin-top: 10px;
+            padding: 10px;
+        }
+        input[type="date"] {
+            min: today;
+        }
+    </style>
+</head>
+<body>
+    <div id="id1">
+        <input style="margin-right: 150px;"  type="text" placeholder="Title" id="title" required>
+        <input type="date" id="date" min="today" required><br>
+        <input style="margin-right: 150px;" type="text" placeholder="Description" id="description">
+        <input type="button" value="Save" onclick="saveData()">
+    </div>
+    <br>
+
+    <div id="id2" >
+        <input type="button" value="SUN" onclick="displayData('SUN')">
+        <input type="button" value="MON" onclick="displayData('MON')">
+        <input type="button" value="TUE" onclick="displayData('TUE')">
+        <input type="button" value="WED" onclick="displayData('WED')">
+        <input type="button" value="THU" onclick="displayData('THU')">
+        <input type="button" value="FRI" onclick="displayData('FRI')">
+        <input type="button" value="SAT" onclick="displayData('SAT')">
+    </div>
+
+    <div id="savedEntries" ></div>
+
+    <script>
+        var savedData = {};
+
+        function saveData() {
+            var title = document.getElementById('title').value;
+            var date = document.getElementById('date').value;
+            var description = document.getElementById('description').value;
+
+            if (!title || !date) {
+                alert('Title and Date are mandatory.');
+                return;
+            }
+
+            savedData[date] = { title: title, description: description };
+
+            // Reflect the entered data below
+            var savedEntriesContainer = document.getElementById('savedEntries');
+            var newEntry = document.createElement('div');
+            newEntry.className = 'saved-entry';
+            newEntry.innerHTML = '<h3>' + title + '</h3><p>' + description + '</p>';
+            newEntry.setAttribute('draggable', 'true');
+            newEntry.setAttribute('ondragstart', 'drag(event)');
+            savedEntriesContainer.appendChild(newEntry);
+
+            // Add edit and delete buttons
+            addEditDeleteButtons(newEntry, date);
+
+            // Reset input fields
+            document.getElementById('title').value = '';
+            document.getElementById('date').value = '';
+            document.getElementById('description').value = '';
+        }
+
+        function displayData(day) {
+            var savedEntriesContainer = document.getElementById('savedEntries');
+            savedEntriesContainer.innerHTML = '';
+
+            for (var key in savedData) {
+                if (savedData.hasOwnProperty(key)) {
+                    var entry = savedData[key];
+                    if (day === getDay(key)) {
+                        var newEntry = document.createElement('div');
+                        newEntry.className = 'saved-entry';
+                        newEntry.innerHTML = '<h3>' + entry.title + '</h3><p>' + entry.description + '</p>';
+                        savedEntriesContainer.appendChild(newEntry);
+
+                        // Add edit and delete buttons
+                        addEditDeleteButtons(newEntry, key);
+                    }
+                }
+            }
+        }
+
+        function getDay(dateString) {
+            var date = new Date(dateString);
+            var days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+            return days[date.getDay()];
+        }
+
+        function addEditDeleteButtons(entry, key) {
+            var editButton = document.createElement('button');
+            editButton.textContent = 'Edit';
+            editButton.onclick = function () {
+                editEntry(key);
+            };
+
+            var deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function () {
+                deleteEntry(key);
+            };
+
+            entry.appendChild(editButton);
+            entry.appendChild(deleteButton);
+        }
+
+        function editEntry(key) {
+            var entry = savedData[key];
+            document.getElementById('title').value = entry.title;
+            document.getElementById('date').value = key;
+            document.getElementById('description').value = entry.description;
+
+            delete savedData[key];
+            updateSavedEntries();
+        }
+
+        function deleteEntry(key) {
+            delete savedData[key];
+            updateSavedEntries();
+        }
+
+        function updateSavedEntries() {
+            var dayButtons = document.querySelectorAll('#id2 input[type="button"]');
+            dayButtons.forEach(function (button) {
+                button.click();
+            });
+        }
+    </script>
+</body>
+</html>
